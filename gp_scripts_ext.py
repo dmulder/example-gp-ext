@@ -48,3 +48,21 @@ class gp_scripts_ext(gp_inf_ext):
                 # settings, we don't want the cache to say it succeeded).
                 self.gp_db.commit()
 
+if __name__ == "__main__":
+    from samba import gpo
+    guid = '{40B6664F-4972-11D1-A7CA-0000F87571E3}'
+    name = 'gp_scripts_ext'
+    path = os.path.abspath(__file__)
+
+    # The register_gp_extension() installs the extension in the registry path
+    # Software/Microsoft/Windows NT/CurrentVersion/Winlogon/GPExtensions. The
+    # required parameters are a unique guid which identifies the client side
+    # extension, the name of the extension class, and a path to the extension.
+    # There are also three optional parameters, smb_conf, which when provided,
+    # effects the location of the registry (this is mostly for automated
+    # testing), and a machine and user parameter. The machine and user
+    # parameters both default to True, or the extension is enabled for both
+    # machine and user policies. In our case we disable the user policy since
+    # we won't be implementing that here.
+    gpo.register_gp_extension(guid, name, path, machine=True, user=False)
+
