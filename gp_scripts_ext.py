@@ -34,6 +34,7 @@ class gp_scripts_ext(gp_inf_ext):
         for gpo in deleted_gpo_list:
             pass
 
+        inf_file = 'MACHINE/Scripts/scripts.ini'
         for gpo in changed_gpo_list:
             # You need to make sure a file_sys_path is provided. Local policies
             # (which don't really exist here) don't provide a path.
@@ -42,7 +43,17 @@ class gp_scripts_ext(gp_inf_ext):
                 # set_guid() each time you work on a different gpo, and you
                 # must call commit() at the end.
                 self.gp_db.set_guid(gpo.name)
-                # parse and apply the setting here
+                path = gpo.file_sys_path.split('\\sysvol\\')[-1]
+                # Each extension is required to provide a read() function. The
+                # parse() function reads the raw text from the sysvol file
+                # passed as the first parameter, then calls the extensions
+                # read() function and returns the results. In our case, we've
+                # inherited from the gp_inf_ext class which already implements
+                # the read() function for us. Our read() function just returned
+                # a ConfigParser object which has already parsed the ini file
+                # for us.
+                inf_conf = self.parse(os.path.join(path, inf_file))
+                # apply the setting here
                 # The manual call to commit() prevents accidental commiting of
                 # settings if the apply fails (if we fail to apply the
                 # settings, we don't want the cache to say it succeeded).
