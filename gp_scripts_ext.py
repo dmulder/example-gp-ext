@@ -53,7 +53,10 @@ class gp_scripts_ext(gp_inf_ext):
                 # a ConfigParser object which has already parsed the ini file
                 # for us.
                 inf_conf = self.parse(os.path.join(path, inf_file))
-                # apply the setting here
+                for section in inf_conf.sections():
+                    for key, value in inf_conf.items(section):
+                        # apply the setting here
+                        print(section, key, value)
                 # The manual call to commit() prevents accidental commiting of
                 # settings if the apply fails (if we fail to apply the
                 # settings, we don't want the cache to say it succeeded).
