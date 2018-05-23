@@ -66,6 +66,18 @@ class gp_scripts_ext(gp_inf_ext):
                     settings[section] = section_settings
                 # apply the setting here
                 print(settings)
+                # Execute the scripts, just to test them for now
+                from subprocess import Popen
+                for key in settings.keys():
+                    script_path = os.path.join(self.lp.cache_path('gpo_cache'),
+                                               path.replace('\\', '/'),
+                                               'MACHINE/Scripts', key)
+                    for value in settings[key].values():
+                        script = os.path.join(script_path, value['CmdLine'])
+                        params = value['Parameters'].split()
+                        cmd = ['/bin/sh', script]
+                        cmd.extend(params)
+                        Popen(cmd)
                 # The manual call to commit() prevents accidental commiting of
                 # settings if the apply fails (if we fail to apply the
                 # settings, we don't want the cache to say it succeeded).
