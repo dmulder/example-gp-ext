@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os.path
+import os.path, re
 from samba.gpclass import gp_inf_ext
 
 class gp_scripts_ext(gp_inf_ext):
@@ -53,10 +53,19 @@ class gp_scripts_ext(gp_inf_ext):
                 # a ConfigParser object which has already parsed the ini file
                 # for us.
                 inf_conf = self.parse(os.path.join(path, inf_file))
+                settings = {}
                 for section in inf_conf.sections():
+                    section_settings = {}
                     for key, value in inf_conf.items(section):
-                        # apply the setting here
-                        print(section, key, value)
+                        for param in ['CmdLine', 'Parameters']:
+                            m = re.match('(\d+)%s' % param, key)
+                            if m:
+                                if not m.group(1) in section_settings.keys():
+                                    section_settings[m.group(1)] = {}
+                                section_settings[m.group(1)][param] = value
+                    settings[section] = section_settings
+                # apply the setting here
+                print(settings)
                 # The manual call to commit() prevents accidental commiting of
                 # settings if the apply fails (if we fail to apply the
                 # settings, we don't want the cache to say it succeeded).
