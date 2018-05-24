@@ -33,7 +33,24 @@ class gp_scripts_ext(gp_inf_ext):
         gpos also).
         '''
         for gpo in deleted_gpo_list:
-            pass
+            guid = gpo[0]
+            # We still need to set the gpo guid when removing policies
+            self.gp_db.set_guid(guid)
+            for key, value in gpo[-1]['Scripts'].items():
+                if 'Startup' in key:
+                    name = '%s:%s' % (guid, key)
+                    profile = gp_file_append('/etc/cron.d/gp_startup')
+                    old_contents = profile.get_section()
+                    contents = ''
+                    for line in old_contents.strip().split('\n'):
+                        if not name in line:
+                            contents += line + '\n'
+                    profile.set_section(contents)
+                    # This is different from an apply. Instead of storing a
+                    # previous value, we're deleting the policy from our store.
+                    # Then we also need to be sure to commit the change later.
+                    self.gp_db.delete(str(self), key)
+            self.gp_db.commit()
 
         inf_file = 'MACHINE/Scripts/scripts.ini'
         for gpo in changed_gpo_list:
@@ -73,10 +90,12 @@ class gp_scripts_ext(gp_inf_ext):
                     if key == 'Startup':
                         profile = gp_file_append('/etc/cron.d/gp_startup')
                         for num, value in settings[key].items():
+                            name = '%s:%s' % (gpo.name, num+key)
                             script = os.path.join(script_path,
                                                   value['CmdLine'])
                             cmd = ' '.join(['@reboot', script,
-                                            value['Parameters']])
+                                            value['Parameters'],
+                                            '# %s' % name])
                             current = profile.get_section()
                             if not cmd in current:
                                 current = current.strip() + '\n' + cmd
