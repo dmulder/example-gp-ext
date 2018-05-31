@@ -1,0 +1,9 @@
+Execute the gp_scripts_ext.py file to install the extension, or use the following python code:
+
+from samba import gpo
+gpo.register_gp_extension('{40B6664F-4972-11D1-A7CA-0000F87571E3}', 'gp_scripts_ext', '/<path to example code>/example-gp-ext/gp_scripts_ext.py', machine=True, user=False)
+
+To execute the extension, use the samba gpupdate command:
+gpupdate --target=Computer --force
+
+Use `gpupdate --help` to see more options, such as user apply.
